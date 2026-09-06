@@ -24,14 +24,6 @@ jobs:
         with:
           path: swift-fit-health-kit
 
-      # Package.swift intentionally uses ../swift-fit for sibling development.
-      - name: Check out SwiftFit dependency
-        uses: actions/checkout@v6
-        with:
-          repository: zaneenders/swift-fit
-          ref: 8ac03654f4b46eaa4a22e819a6c4c193e08517a7
-          path: swift-fit
-
       - name: Show toolchain versions
         working-directory: swift-fit-health-kit
         run: |
