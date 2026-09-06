@@ -444,12 +444,12 @@ public enum WorkoutFITEncoder {
       throw WorkoutFITEncodingError.invalidDuration
     }
     if let distance = bundle.totalDistanceMeters,
-      (!distance.isFinite || distance < 0)
+      !distance.isFinite || distance < 0
     {
       throw WorkoutFITEncodingError.invalidDistance
     }
     if let energy = bundle.totalEnergyKcal,
-      (!energy.isFinite || energy < 0)
+      !energy.isFinite || energy < 0
     {
       throw WorkoutFITEncodingError.invalidEnergy
     }

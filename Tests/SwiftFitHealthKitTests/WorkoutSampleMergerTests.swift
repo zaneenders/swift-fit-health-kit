@@ -53,12 +53,13 @@ import Testing
     let samples = WorkoutSampleMerger.merge(
       raw: raw, startDate: start, endDate: start.addingTimeInterval(4))
 
-    #expect(samples.map(\.timestamp) == [
-      start,
-      start.addingTimeInterval(1),
-      start.addingTimeInterval(2),
-      start.addingTimeInterval(3),
-    ])
+    #expect(
+      samples.map(\.timestamp) == [
+        start,
+        start.addingTimeInterval(1),
+        start.addingTimeInterval(2),
+        start.addingTimeInterval(3),
+      ])
     #expect(samples[1].powerWatts == 200)
     #expect(samples[3].cadenceRpm == 80)
   }
@@ -141,9 +142,10 @@ import Testing
     let samples = WorkoutSampleMerger.merge(
       raw: raw, startDate: start, endDate: start.addingTimeInterval(4))
 
-    #expect(samples.map(\.timestamp) == [
-      start.addingTimeInterval(1), start.addingTimeInterval(3),
-    ])
+    #expect(
+      samples.map(\.timestamp) == [
+        start.addingTimeInterval(1), start.addingTimeInterval(3),
+      ])
     #expect(samples[0].heartRateBpm == 121)
   }
 }
@@ -158,10 +160,11 @@ import Testing
     ])
 
     #expect(result.map(\.value) == [5, 12, 20])
-    #expect(result.map(\.date) == [
-      start.addingTimeInterval(10),
-      start.addingTimeInterval(20),
-      start.addingTimeInterval(30),
-    ])
+    #expect(
+      result.map(\.date) == [
+        start.addingTimeInterval(10),
+        start.addingTimeInterval(20),
+        start.addingTimeInterval(30),
+      ])
   }
 }

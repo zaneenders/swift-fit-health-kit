@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: macOS
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Check out SwiftFitHealthKit
+        uses: actions/checkout@v6
+        with:
+          path: swift-fit-health-kit
+
+      # Package.swift intentionally uses ../swift-fit for sibling development.
+      - name: Check out SwiftFit dependency
+        uses: actions/checkout@v6
+        with:
+          repository: zaneenders/swift-fit
+          ref: 8ac0365
+          path: swift-fit
+
+      - name: Show toolchain versions
+        working-directory: swift-fit-health-kit
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Check formatting
+        working-directory: swift-fit-health-kit
+        run: swift format lint --strict --recursive Sources Tests Package.swift
+
+      - name: Build
+        working-directory: swift-fit-health-kit
+        run: swift build
+
+      - name: Test with coverage
+        working-directory: swift-fit-health-kit
+        run: swift test --enable-code-coverage
