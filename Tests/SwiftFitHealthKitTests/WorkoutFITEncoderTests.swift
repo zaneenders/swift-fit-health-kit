@@ -47,11 +47,11 @@ import Testing
     let records = fit.messages.filter { $0.globalMessageNumber == FITGlobalMessage.record }
     #expect(records.count == 2)
     #expect(records[0].uint8Field(number: FITRecordField.heartRate) == 123)
-    #expect(records[0].uint8Field(number: FITRecordField.cadence) == 84)
-    #expect(records[0].uint16Field(number: FITRecordField.power) == 250)
+    #expect(records[0].uint8Field(number: 4) == 84)
+    #expect(records[0].uint16Field(number: 7) == 250)
     #expect(records[0].uint16Field(number: FITRecordField.speed) == 5_250)
     #expect(records[1].uint8Field(number: FITRecordField.heartRate) == 145)
-    #expect(records[1].uint16Field(number: FITRecordField.power) == 310)
+    #expect(records[1].uint16Field(number: 7) == 310)
 
     let summary = try FITActivityParser.parse(bytes: Array(data))
     #expect(summary.points.count == 2)

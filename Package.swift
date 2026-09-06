@@ -12,7 +12,10 @@ let package = Package(
     .library(name: "SwiftFitHealthKit", targets: ["SwiftFitHealthKit"])
   ],
   dependencies: [
-    .package(path: "../swift-fit")
+    .package(
+      url: "https://github.com/zaneenders/swift-fit.git",
+      revision: "c7e0afacc9728f3cc7ef19cae2ebcdba037a62ff"
+    )
   ],
   targets: [
     .target(

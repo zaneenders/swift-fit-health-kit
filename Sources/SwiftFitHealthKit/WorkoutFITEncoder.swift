@@ -95,8 +95,8 @@ public enum WorkoutFITEncoder {
           (FITRecordField.distance, 4, .uint32),
           (FITRecordField.speed, 2, .uint16),
           (FITRecordField.heartRate, 1, .uint8),
-          (FITRecordField.cadence, 1, .uint8),
-          (FITRecordField.power, 2, .uint16),
+          (4, 1, .uint8),  // cadence
+          (7, 2, .uint16),  // power
         ])
     } else {
       recordLocal = try writer.define(
@@ -106,8 +106,8 @@ public enum WorkoutFITEncoder {
           (FITRecordField.distance, 4, .uint32),
           (FITRecordField.speed, 2, .uint16),
           (FITRecordField.heartRate, 1, .uint8),
-          (FITRecordField.cadence, 1, .uint8),
-          (FITRecordField.power, 2, .uint16),
+          (4, 1, .uint8),  // cadence
+          (7, 2, .uint16),  // power
         ])
     }
 
