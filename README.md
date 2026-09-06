@@ -27,4 +27,4 @@ The lower-level APIs are public for deterministic tests and specialized callers:
 - `WorkoutFITEncoder`
 - `WorkoutExportBundle` and related sample models
 
-FIT timestamp compression is deliberately disabled for the current timestamp-first record definition. See `../../FIT_VALIDATION_PLAN.md` for the interoperability and release gates.
+FIT timestamp compression is deliberately disabled for the current timestamp-first record definition.

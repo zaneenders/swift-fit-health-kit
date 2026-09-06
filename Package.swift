@@ -11,7 +11,7 @@ let package = Package(
     .library(name: "SwiftFitHealthKit", targets: ["SwiftFitHealthKit"]),
   ],
   dependencies: [
-    .package(path: "../../../swift-fit"),
+    .package(path: "../swift-fit"),
   ],
   targets: [
     .target(
