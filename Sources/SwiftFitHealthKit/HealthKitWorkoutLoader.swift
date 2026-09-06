@@ -69,8 +69,8 @@ public enum HealthKitWorkoutLoader {
     let raw = try await loadRawSamples(for: workout, store: store)
     let sport = WorkoutSport(workout: workout)
     let totalDistance = workout.totalDistance?.doubleValue(for: .meter())
-    let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
-    let totalEnergy = workout.statistics(for: energyType)?
+    let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)
+    let totalEnergy = energyType.flatMap { workout.statistics(for: $0) }?
       .sumQuantity()?
       .doubleValue(for: .kilocalorie())
     let samples = WorkoutSampleMerger.merge(
@@ -94,9 +94,18 @@ public enum HealthKitWorkoutLoader {
     predicate: NSPredicate,
     store: HKHealthStore
   ) async throws -> [TimedQuantity] {
-    let identifier: HKQuantityTypeIdentifier =
-      workout.workoutActivityType == .cycling ? .distanceCycling : .distanceWalkingRunning
-    return try await quantitySamples(
+    let identifier: HKQuantityTypeIdentifier
+    switch workout.workoutActivityType {
+    case .cycling:
+      identifier = .distanceCycling
+    case .swimming:
+      identifier = .distanceSwimming
+    case .wheelchairWalkPace, .wheelchairRunPace:
+      identifier = .distanceWheelchair
+    default:
+      identifier = .distanceWalkingRunning
+    }
+    return try await cumulativeQuantitySamples(
       identifier: identifier,
       unit: .meter(),
       predicate: predicate,
@@ -119,13 +128,46 @@ public enum HealthKitWorkoutLoader {
     )
   }
 
+  /// HealthKit distance samples contain the distance measured during each
+  /// sample interval, not the workout's running total. FIT record distance is
+  /// cumulative, so convert the ordered intervals before merging timelines.
+  private static func cumulativeQuantitySamples(
+    identifier: HKQuantityTypeIdentifier,
+    unit: HKUnit,
+    predicate: NSPredicate,
+    store: HKHealthStore
+  ) async throws -> [TimedQuantity] {
+    guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else { return [] }
+    let descriptor = HKSampleQueryDescriptor(
+      predicates: [.quantitySample(type: type, predicate: predicate)],
+      sortDescriptors: [SortDescriptor(\.endDate, order: .forward)]
+    )
+    let samples = try await descriptor.result(for: store)
+    let intervals = samples.map {
+      TimedQuantity(date: $0.endDate, value: $0.quantity.doubleValue(for: unit))
+    }
+    return cumulativeDistanceSamples(from: intervals)
+  }
+
+  static func cumulativeDistanceSamples(from intervalSamples: [TimedQuantity]) -> [TimedQuantity] {
+    var cumulative = 0.0
+    return intervalSamples.sorted { $0.date < $1.date }.compactMap { sample in
+      guard sample.value.isFinite,
+        sample.value >= 0,
+        cumulative <= Double.greatestFiniteMagnitude - sample.value
+      else { return nil }
+      cumulative += sample.value
+      return TimedQuantity(date: sample.date, value: cumulative)
+    }
+  }
+
   private static func quantitySamples(
     identifier: HKQuantityTypeIdentifier,
     unit: HKUnit,
     predicate: NSPredicate,
     store: HKHealthStore
   ) async throws -> [TimedQuantity] {
-    let type = HKQuantityType.quantityType(forIdentifier: identifier)!
+    guard let type = HKQuantityType.quantityType(forIdentifier: identifier) else { return [] }
     let descriptor = HKSampleQueryDescriptor(
       predicates: [.quantitySample(type: type, predicate: predicate)],
       sortDescriptors: [SortDescriptor(\.startDate, order: .forward)]

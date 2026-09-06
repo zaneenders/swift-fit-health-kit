@@ -93,18 +93,45 @@ public enum WorkoutSport: Sendable, Hashable {
   case running(indoor: Bool)
   case walking(indoor: Bool)
   case cycling(indoor: Bool)
+  case swimming(indoor: Bool)
+  case hiking
+  case rowing(indoor: Bool)
+  case elliptical
+  case stairClimbing
+  case crossTraining
+  case crossCountrySkiing
+  case downhillSkiing
+  case snowboarding
+  case strengthTraining
+  case highIntensityIntervalTraining
+  case yoga
+  case pilates
+  case dance
+  case wheelchair(indoor: Bool)
+  case other
 
   public init(workout: HKWorkout) {
     let indoor = workout.metadata?[HKMetadataKeyIndoorWorkout] as? Bool ?? false
     switch workout.workoutActivityType {
-    case .cycling:
-      self = .cycling(indoor: indoor)
-    case .walking:
-      self = .walking(indoor: indoor)
-    case .running:
-      self = .running(indoor: indoor)
-    default:
-      self = .running(indoor: indoor)
+    case .cycling: self = .cycling(indoor: indoor)
+    case .walking: self = .walking(indoor: indoor)
+    case .running: self = .running(indoor: indoor)
+    case .swimming: self = .swimming(indoor: indoor)
+    case .hiking: self = .hiking
+    case .rowing: self = .rowing(indoor: indoor)
+    case .elliptical: self = .elliptical
+    case .stairClimbing: self = .stairClimbing
+    case .crossTraining, .mixedCardio: self = .crossTraining
+    case .crossCountrySkiing: self = .crossCountrySkiing
+    case .downhillSkiing: self = .downhillSkiing
+    case .snowboarding: self = .snowboarding
+    case .traditionalStrengthTraining, .functionalStrengthTraining: self = .strengthTraining
+    case .highIntensityIntervalTraining: self = .highIntensityIntervalTraining
+    case .yoga: self = .yoga
+    case .pilates: self = .pilates
+    case .dance: self = .dance
+    case .wheelchairWalkPace, .wheelchairRunPace: self = .wheelchair(indoor: indoor)
+    default: self = .other
     }
   }
 
@@ -113,6 +140,22 @@ public enum WorkoutSport: Sendable, Hashable {
     case .running(let indoor): indoor ? "Indoor Run" : "Run"
     case .walking(let indoor): indoor ? "Indoor Walk" : "Walk"
     case .cycling(let indoor): indoor ? "Indoor Ride" : "Ride"
+    case .swimming(let indoor): indoor ? "Pool Swim" : "Open Water Swim"
+    case .hiking: "Hike"
+    case .rowing(let indoor): indoor ? "Indoor Row" : "Row"
+    case .elliptical: "Elliptical"
+    case .stairClimbing: "Stair Climbing"
+    case .crossTraining: "Cross Training"
+    case .crossCountrySkiing: "Cross-Country Skiing"
+    case .downhillSkiing: "Downhill Skiing"
+    case .snowboarding: "Snowboarding"
+    case .strengthTraining: "Strength Training"
+    case .highIntensityIntervalTraining: "HIIT"
+    case .yoga: "Yoga"
+    case .pilates: "Pilates"
+    case .dance: "Dance"
+    case .wheelchair(let indoor): indoor ? "Indoor Wheelchair" : "Wheelchair"
+    case .other: "Workout"
     }
   }
 
@@ -121,6 +164,22 @@ public enum WorkoutSport: Sendable, Hashable {
     case .running(let indoor): indoor ? "indoor-run" : "run"
     case .walking(let indoor): indoor ? "indoor-walk" : "walk"
     case .cycling(let indoor): indoor ? "indoor-ride" : "ride"
+    case .swimming(let indoor): indoor ? "pool-swim" : "open-water-swim"
+    case .hiking: "hike"
+    case .rowing(let indoor): indoor ? "indoor-row" : "row"
+    case .elliptical: "elliptical"
+    case .stairClimbing: "stair-climbing"
+    case .crossTraining: "cross-training"
+    case .crossCountrySkiing: "cross-country-skiing"
+    case .downhillSkiing: "downhill-skiing"
+    case .snowboarding: "snowboarding"
+    case .strengthTraining: "strength-training"
+    case .highIntensityIntervalTraining: "hiit"
+    case .yoga: "yoga"
+    case .pilates: "pilates"
+    case .dance: "dance"
+    case .wheelchair(let indoor): indoor ? "indoor-wheelchair" : "wheelchair"
+    case .other: "workout"
     }
   }
 }

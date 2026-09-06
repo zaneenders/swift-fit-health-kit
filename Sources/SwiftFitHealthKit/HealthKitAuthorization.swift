@@ -16,6 +16,8 @@ public enum HealthKitAuthorization {
       .heartRate,
       .distanceWalkingRunning,
       .distanceCycling,
+      .distanceSwimming,
+      .distanceWheelchair,
       .runningSpeed,
       .cyclingSpeed,
       .cyclingCadence,

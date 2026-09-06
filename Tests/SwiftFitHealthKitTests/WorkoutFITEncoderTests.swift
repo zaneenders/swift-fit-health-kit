@@ -39,7 +39,7 @@ import Testing
       ])
 
     let data = try WorkoutFITEncoder.encode(bundle: bundle)
-    var options = FITDecodeOptions(validateFileCRC: true, validateHeaderCRC: true)
+    let options = FITDecodeOptions(validateFileCRC: true, validateHeaderCRC: true)
     let fit = try FITFile(data: data, options: options)
     #expect(fit.headerCRCValid)
     #expect(fit.fileCRCValid)
@@ -84,4 +84,54 @@ import Testing
     #expect(records.count == 100)
     #expect(records.compactMap { $0.uint32Field(number: FITRecordField.timestamp) }.count == 100)
   }
+  @Test func writesPausedDurationAsTimerTimeAndWallClockAsElapsedTime() throws {
+    let start = Date(timeIntervalSince1970: 1_700_000_000)
+    let bundle = WorkoutExportBundle(
+      startDate: start,
+      endDate: start.addingTimeInterval(600),
+      duration: 480,
+      totalDistanceMeters: 1_000,
+      totalEnergyKcal: nil,
+      sport: .walking(indoor: false),
+      samples: [])
+
+    let fit = try FITFile(data: WorkoutFITEncoder.encode(bundle: bundle))
+    let session = try #require(
+      fit.messages.first { $0.globalMessageNumber == FITGlobalMessage.session })
+    #expect(session.uint32Field(number: FITSessionField.totalElapsedTime) == 600_000)
+    #expect(session.uint32Field(number: FITSessionField.totalTimerTime) == 480_000)
+  }
+
+  @Test func rejectsNonFiniteAndInvalidPublicInputInsteadOfTrapping() {
+    let start = Date(timeIntervalSince1970: 1_700_000_000)
+    let bundle = WorkoutExportBundle(
+      startDate: start,
+      endDate: start.addingTimeInterval(10),
+      duration: 10,
+      totalDistanceMeters: .nan,
+      totalEnergyKcal: nil,
+      sport: .other,
+      samples: [])
+
+    #expect(throws: WorkoutFITEncodingError.invalidDistance) {
+      try WorkoutFITEncoder.encode(bundle: bundle)
+    }
+  }
+
+  @Test func rejectsOutOfRangeCoordinatesInsteadOfTrapping() {
+    let start = Date(timeIntervalSince1970: 1_700_000_000)
+    let bundle = WorkoutExportBundle(
+      startDate: start,
+      endDate: start,
+      duration: 0,
+      totalDistanceMeters: nil,
+      totalEnergyKcal: nil,
+      sport: .hiking,
+      samples: [WorkoutSample(timestamp: start, latitude: 91, longitude: 0)])
+
+    #expect(throws: WorkoutFITEncodingError.invalidSample(start)) {
+      try WorkoutFITEncoder.encode(bundle: bundle)
+    }
+  }
+
 }
