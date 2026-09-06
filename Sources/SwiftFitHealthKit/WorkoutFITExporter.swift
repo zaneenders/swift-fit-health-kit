@@ -1,6 +1,6 @@
-import SwiftFitActivity
 import Foundation
 import HealthKit
+import SwiftFitActivity
 
 public enum WorkoutFITExporter {
   public static func encode(bundle: WorkoutExportBundle) throws -> Data {

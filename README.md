@@ -1,4 +1,4 @@
-# SwiftFitHealthKit
+# swift-fit-health-kit
 
 An iOS-only Swift package that converts HealthKit workouts into Garmin FIT activity files.
 

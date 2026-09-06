@@ -1,6 +1,6 @@
+import CoreLocation
 import Foundation
 import HealthKit
-import CoreLocation
 import Synchronization
 
 private final class RouteLocationCollector: Sendable {
@@ -88,7 +88,6 @@ public enum HealthKitWorkoutLoader {
       samples: samples
     )
   }
-
 
   private static func distanceSamples(
     for workout: HKWorkout,

@@ -34,7 +34,8 @@ public enum WorkoutFITEncoder {
     let avgHeartRate = averageHeartRate(from: heartRates)
     let maxHeartRate = heartRates.max()
 
-    let totalDistance = bundle.totalDistanceMeters
+    let totalDistance =
+      bundle.totalDistanceMeters
       ?? recordSamples.compactMap(\.distanceMeters).max()
       ?? 0
 
@@ -420,8 +421,8 @@ public enum WorkoutFITEncoder {
   }
 }
 
-private extension WorkoutSport {
-  var fitSportRawValue: UInt8 {
+extension WorkoutSport {
+  fileprivate var fitSportRawValue: UInt8 {
     switch self {
     case .running: FITSport.running.rawValue
     case .walking: 11
@@ -429,7 +430,7 @@ private extension WorkoutSport {
     }
   }
 
-  var fitSubSport: FITSubSport {
+  fileprivate var fitSubSport: FITSubSport {
     switch self {
     case .running(let indoor): indoor ? .treadmill : .generic
     case .walking(let indoor): indoor ? .treadmill : .generic

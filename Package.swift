@@ -1,17 +1,18 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.3
 
 import PackageDescription
 
 let package = Package(
-  name: "SwiftFitHealthKit",
+  name: "swift-fit-health-kit",
   platforms: [
     .iOS(.v18),
+    .macOS(.v26),
   ],
   products: [
-    .library(name: "SwiftFitHealthKit", targets: ["SwiftFitHealthKit"]),
+    .library(name: "SwiftFitHealthKit", targets: ["SwiftFitHealthKit"])
   ],
   dependencies: [
-    .package(path: "../swift-fit"),
+    .package(path: "../swift-fit")
   ],
   targets: [
     .target(
@@ -21,7 +22,7 @@ let package = Package(
         .product(name: "SwiftFitActivity", package: "swift-fit"),
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v6),
+        .swiftLanguageMode(.v6)
       ]
     ),
     .testTarget(
@@ -32,7 +33,7 @@ let package = Package(
         .product(name: "SwiftFitActivity", package: "swift-fit"),
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v6),
+        .swiftLanguageMode(.v6)
       ]
     ),
   ]
