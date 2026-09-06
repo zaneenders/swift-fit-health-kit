@@ -1,6 +1,31 @@
 import Foundation
 import HealthKit
 import CoreLocation
+import Synchronization
+
+private final class RouteLocationCollector: Sendable {
+  private struct State: Sendable {
+    var locations: [TimedLocation] = []
+    var isFinished = false
+  }
+
+  private let state = Mutex(State())
+
+  nonisolated func append(contentsOf newLocations: [TimedLocation]) {
+    state.withLock { state in
+      guard !state.isFinished else { return }
+      state.locations.append(contentsOf: newLocations)
+    }
+  }
+
+  nonisolated func finish() -> [TimedLocation]? {
+    state.withLock { state in
+      guard !state.isFinished else { return nil }
+      state.isFinished = true
+      return state.locations
+    }
+  }
+}
 
 public enum HealthKitWorkoutLoader {
   public static func loadRawSamples(for workout: HKWorkout, store: HKHealthStore) async throws -> RawWorkoutSamples {
@@ -44,7 +69,10 @@ public enum HealthKitWorkoutLoader {
     let raw = try await loadRawSamples(for: workout, store: store)
     let sport = WorkoutSport(workout: workout)
     let totalDistance = workout.totalDistance?.doubleValue(for: .meter())
-    let totalEnergy = workout.totalEnergyBurned?.doubleValue(for: .kilocalorie())
+    let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+    let totalEnergy = workout.statistics(for: energyType)?
+      .sumQuantity()?
+      .doubleValue(for: .kilocalorie())
     let samples = WorkoutSampleMerger.merge(
       raw: raw,
       startDate: workout.startDate,
@@ -156,16 +184,18 @@ public enum HealthKitWorkoutLoader {
     store: HKHealthStore
   ) async throws -> [TimedLocation] {
     try await withCheckedThrowingContinuation { continuation in
-      var collected: [TimedLocation] = []
+      let collector = RouteLocationCollector()
       let query = HKWorkoutRouteQuery(route: route) { _, locations, done, error in
         if let error {
-          continuation.resume(throwing: error)
+          if collector.finish() != nil {
+            continuation.resume(throwing: error)
+          }
           return
         }
         if let locations {
-          collected.append(contentsOf: locations.map(Self.timedLocation(from:)))
+          collector.append(contentsOf: locations.map(Self.timedLocation(from:)))
         }
-        if done {
+        if done, let collected = collector.finish() {
           continuation.resume(returning: collected)
         }
       }

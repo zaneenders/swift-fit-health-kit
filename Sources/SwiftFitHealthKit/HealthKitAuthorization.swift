@@ -35,7 +35,7 @@ public enum HealthKitAuthorization {
     do {
       let status = try await store.statusForAuthorizationRequest(toShare: [], read: readTypes)
       switch status {
-      case .shouldRequest:
+      case .unknown, .shouldRequest:
         return .notDetermined
       case .unnecessary:
         return .prompted
