@@ -5,17 +5,14 @@ import PackageDescription
 let package = Package(
   name: "swift-fit-health-kit",
   platforms: [
-    .iOS(.v18),
+    .iOS(.v26),
     .macOS(.v26),
   ],
   products: [
     .library(name: "SwiftFitHealthKit", targets: ["SwiftFitHealthKit"])
   ],
   dependencies: [
-    .package(
-      url: "https://github.com/zaneenders/swift-fit.git",
-      revision: "c7e0afacc9728f3cc7ef19cae2ebcdba037a62ff"
-    )
+    .package(path: "../swift-fit")
   ],
   targets: [
     .target(
