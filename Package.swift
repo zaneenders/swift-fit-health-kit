@@ -14,7 +14,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/zaneenders/swift-fit.git",
-      revision: "8ac03654f4b46eaa4a22e819a6c4c193e08517a7"
+      revision: "16d9e57a48464e5857c7b49e9a83fde0f8db202a"
     )
   ],
   targets: [
