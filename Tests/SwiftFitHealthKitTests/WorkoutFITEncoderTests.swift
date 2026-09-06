@@ -56,6 +56,10 @@ import Testing
     let summary = try FITActivityParser.parse(bytes: Array(data))
     #expect(summary.points.count == 2)
     #expect(summary.points[0].heartRate == 123)
+    #expect(abs((summary.points[0].lat ?? 0) - 40.75) < 0.000_001)
+    #expect(abs((summary.points[0].lon ?? 0) - -111.88) < 0.000_001)
+    #expect(abs((summary.points[1].lat ?? 0) - 40.751) < 0.000_001)
+    #expect(abs((summary.points[1].lon ?? 0) - -111.879) < 0.000_001)
     #expect(summary.sport == .cycling)
     #expect(abs((summary.sessionDistanceMeters ?? 0) - 50) < 0.01)
   }
