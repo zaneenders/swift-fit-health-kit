@@ -184,6 +184,61 @@ public enum WorkoutSport: Sendable, Hashable {
   }
 }
 
+public struct WorkoutExportDiagnostics: Sendable, Hashable {
+  public let routeCount: Int
+  public let routeLocationCount: Int
+  public let mergedSampleCount: Int
+  public let mergedGPSCount: Int
+  public let encodedRecordCount: Int
+  public let encodedGPSCount: Int
+
+  public init(
+    routeCount: Int,
+    routeLocationCount: Int,
+    mergedSampleCount: Int,
+    mergedGPSCount: Int,
+    encodedRecordCount: Int,
+    encodedGPSCount: Int
+  ) {
+    self.routeCount = routeCount
+    self.routeLocationCount = routeLocationCount
+    self.mergedSampleCount = mergedSampleCount
+    self.mergedGPSCount = mergedGPSCount
+    self.encodedRecordCount = encodedRecordCount
+    self.encodedGPSCount = encodedGPSCount
+  }
+
+  public var hasGPS: Bool { encodedGPSCount > 0 }
+
+  public var summary: String {
+    "routes=\(routeCount) route_locations=\(routeLocationCount) merged_samples=\(mergedSampleCount) merged_gps=\(mergedGPSCount) encoded_records=\(encodedRecordCount) encoded_gps=\(encodedGPSCount)"
+  }
+}
+
+public struct WorkoutFITExport: Sendable {
+  public let data: Data
+  public let filename: String
+  public let diagnostics: WorkoutExportDiagnostics
+
+  public init(data: Data, filename: String, diagnostics: WorkoutExportDiagnostics) {
+    self.data = data
+    self.filename = filename
+    self.diagnostics = diagnostics
+  }
+}
+
+public struct WorkoutBundleLoadResult: Sendable {
+  public let bundle: WorkoutExportBundle
+  public let routeCount: Int
+  public let routeLocationCount: Int
+
+  public init(bundle: WorkoutExportBundle, routeCount: Int, routeLocationCount: Int) {
+    self.bundle = bundle
+    self.routeCount = routeCount
+    self.routeLocationCount = routeLocationCount
+  }
+}
+
 public struct WorkoutExportBundle: Sendable {
   public let startDate: Date
   public let endDate: Date

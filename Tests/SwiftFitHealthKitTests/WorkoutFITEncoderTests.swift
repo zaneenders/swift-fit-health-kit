@@ -64,6 +64,36 @@ import Testing
     #expect(abs((summary.sessionDistanceMeters ?? 0) - 50) < 0.01)
   }
 
+  @Test func exportDiagnosticsDescribeEveryPipelineStage() {
+    let diagnostics = WorkoutExportDiagnostics(
+      routeCount: 1,
+      routeLocationCount: 2_400,
+      mergedSampleCount: 2_399,
+      mergedGPSCount: 2_399,
+      encodedRecordCount: 2_399,
+      encodedGPSCount: 2_399
+    )
+
+    #expect(diagnostics.hasGPS)
+    #expect(
+      diagnostics.summary
+        == "routes=1 route_locations=2400 merged_samples=2399 merged_gps=2399 encoded_records=2399 encoded_gps=2399"
+    )
+  }
+
+  @Test func zeroEncodedGPSIsReported() {
+    let diagnostics = WorkoutExportDiagnostics(
+      routeCount: 0,
+      routeLocationCount: 0,
+      mergedSampleCount: 7_000,
+      mergedGPSCount: 0,
+      encodedRecordCount: 7_000,
+      encodedGPSCount: 0
+    )
+
+    #expect(!diagnostics.hasGPS)
+  }
+
   @Test func producesNormalRecordHeadersForTimestampFirstDefinition() throws {
     let start = Date(timeIntervalSince1970: 1_700_000_000)
     let samples = (0..<100).map { index in

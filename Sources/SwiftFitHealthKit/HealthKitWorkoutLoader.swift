@@ -28,7 +28,20 @@ private final class RouteLocationCollector: Sendable {
 }
 
 public enum HealthKitWorkoutLoader {
+  private struct RawSampleLoadResult: Sendable {
+    let samples: RawWorkoutSamples
+    let routeCount: Int
+    let routeLocationCount: Int
+  }
+
   public static func loadRawSamples(for workout: HKWorkout, store: HKHealthStore) async throws -> RawWorkoutSamples {
+    try await loadRawSampleResult(for: workout, store: store).samples
+  }
+
+  private static func loadRawSampleResult(
+    for workout: HKWorkout,
+    store: HKHealthStore
+  ) async throws -> RawSampleLoadResult {
     let workoutPredicate = HKQuery.predicateForObjects(from: workout)
     let heartRates = try await quantitySamples(
       identifier: .heartRate,
@@ -50,15 +63,20 @@ public enum HealthKitWorkoutLoader {
       predicate: workoutPredicate,
       store: store
     )
-    let locations = try await routeLocations(for: workout, store: store)
+    let routes = try await workoutRoutes(for: workout, store: store)
+    let locations = try await routeLocations(for: routes, store: store)
 
-    return RawWorkoutSamples(
-      heartRates: heartRates,
-      distances: distances,
-      speeds: speeds,
-      cadences: cadences,
-      powers: powers,
-      locations: locations
+    return RawSampleLoadResult(
+      samples: RawWorkoutSamples(
+        heartRates: heartRates,
+        distances: distances,
+        speeds: speeds,
+        cadences: cadences,
+        powers: powers,
+        locations: locations
+      ),
+      routeCount: routes.count,
+      routeLocationCount: locations.count
     )
   }
 
@@ -66,7 +84,15 @@ public enum HealthKitWorkoutLoader {
     for workout: HKWorkout,
     store: HKHealthStore
   ) async throws -> WorkoutExportBundle {
-    let raw = try await loadRawSamples(for: workout, store: store)
+    try await loadExportBundle(for: workout, store: store).bundle
+  }
+
+  public static func loadExportBundle(
+    for workout: HKWorkout,
+    store: HKHealthStore
+  ) async throws -> WorkoutBundleLoadResult {
+    let loaded = try await loadRawSampleResult(for: workout, store: store)
+    let raw = loaded.samples
     let sport = WorkoutSport(workout: workout)
     let totalDistance = workout.totalDistance?.doubleValue(for: .meter())
     let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)
@@ -78,7 +104,7 @@ public enum HealthKitWorkoutLoader {
       startDate: workout.startDate,
       endDate: workout.endDate
     )
-    return WorkoutExportBundle(
+    let bundle = WorkoutExportBundle(
       startDate: workout.startDate,
       endDate: workout.endDate,
       duration: workout.duration,
@@ -86,6 +112,11 @@ public enum HealthKitWorkoutLoader {
       totalEnergyKcal: totalEnergy,
       sport: sport,
       samples: samples
+    )
+    return WorkoutBundleLoadResult(
+      bundle: bundle,
+      routeCount: loaded.routeCount,
+      routeLocationCount: loaded.routeLocationCount
     )
   }
 
@@ -182,10 +213,9 @@ public enum HealthKitWorkoutLoader {
   }
 
   private static func routeLocations(
-    for workout: HKWorkout,
+    for routes: [HKWorkoutRoute],
     store: HKHealthStore
   ) async throws -> [TimedLocation] {
-    let routes = try await workoutRoutes(for: workout, store: store)
     guard !routes.isEmpty else { return [] }
 
     var allLocations: [TimedLocation] = []
